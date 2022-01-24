@@ -1,4 +1,4 @@
-# Unattached NICss
+# Unattached NICs
 
 ## Purpose
 
