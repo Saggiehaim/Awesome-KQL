@@ -1,0 +1,328 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# AAD NonInteractive User SignInLogs Report"
+            },
+            "customWidth": "60",
+            "name": "Header"
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "tabs",
+              "links": [
+                {
+                  "id": "f04b330e-186e-46e8-9605-10f6830a7ed3",
+                  "cellValue": "SelectedTabName",
+                  "linkTarget": "parameter",
+                  "linkLabel": "Overview Report",
+                  "subTarget": "overview",
+                  "style": "link"
+                },
+                {
+                  "id": "7c89f7e2-8db2-4006-ab02-09ac8b8c1f3f",
+                  "cellValue": "SelectedTabName",
+                  "linkTarget": "parameter",
+                  "linkLabel": "AAD Signing Error Codes",
+                  "subTarget": "error",
+                  "style": "link"
+                }
+              ]
+            },
+            "name": "links - 3"
+          }
+        ],
+        "exportParameters": true
+      },
+      "name": "Header"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "8d041514-f839-4f8e-bd7d-be9093db8ff2",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Subscription",
+                  "type": 6,
+                  "isRequired": true,
+                  "typeSettings": {
+                    "additionalResourceOptions": [],
+                    "includeAll": true,
+                    "showDefault": false
+                  },
+                  "value": null
+                },
+                {
+                  "id": "28c561c6-aecb-45d5-aad4-f63efd977fb9",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "laws",
+                  "label": "Log Analytics Workspace",
+                  "type": 5,
+                  "isRequired": true,
+                  "query": "resources\r\n| where type == \"microsoft.operationalinsights/workspaces\"\r\n| project value = id, label = name, selected = false, group = resourceGroup",
+                  "crossComponentResources": [
+                    "{Subscription}"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [],
+                    "showDefault": false
+                  },
+                  "queryType": 1,
+                  "resourceType": "microsoft.operationalinsights/workspaces"
+                },
+                {
+                  "id": "e1c2a145-fe43-4185-968c-2bd96dc4d2a5",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeRange",
+                  "label": "Time Range",
+                  "type": 4,
+                  "description": "Set the time range for report",
+                  "isRequired": true,
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ]
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.resourcegraph/resources"
+            },
+            "name": "Time range picker"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "Usage\n| where IsBillable == true\n| summarize TotalVolumeGB = sum(Quantity) / 1000 by bin(StartTime, 1d), DataType\n| render columnchart",
+              "size": 1,
+              "title": "GB ingestion per DataType  {TimeRange:label}",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{laws}"
+              ],
+              "gridSettings": {
+                "sortBy": [
+                  {
+                    "itemKey": "TotalVolumeGB",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "TotalVolumeGB",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "customWidth": "60",
+            "name": "query - 2"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "Usage\r\n| where TimeGenerated {TimeRange}\r\n| where IsBillable == true\r\n| where DataType == \"AADNonInteractiveUserSignInLogs\"\r\n| summarize TotalVolumeGB = sum(Quantity) / 1000 by bin(StartTime, 1d), DataType\r\n| summarize sum(TotalVolumeGB)",
+              "size": 4,
+              "title": "AAD NonInteractive Logs Data Volume Ingested by {TimeRange:label}",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{laws}"
+              ],
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": {},
+                "leftContent": {
+                  "columnMatch": "sum_TotalVolumeGB",
+                  "numberFormat": {
+                    "unit": 5,
+                    "options": {
+                      "style": "decimal",
+                      "minimumFractionDigits": 3
+                    }
+                  }
+                },
+                "showBorder": false
+              }
+            },
+            "customWidth": "40",
+            "name": "Data Volume Ingested"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AADNonInteractiveUserSignInLogs\r\n| where TimeGenerated {TimeRange}\r\n| where ResultType != 0\r\n| summarize count() by ResultType, bin(TimeGenerated, 1h)\r\n| render timechart ",
+              "size": 0,
+              "title": "Unsuccessful Alerts over time",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{laws}"
+              ]
+            },
+            "name": "query - 3"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AADNonInteractiveUserSignInLogs\n| where TimeGenerated {TimeRange}\n| summarize Successful=countif(ResultType == 0) , Unsuccessful=countif(ResultType != 0), Total = count() by UserPrincipalName\n| order by Unsuccessful",
+              "size": 0,
+              "title": "Top users With Unsuccessful Logins",
+              "timeContextFromParameter": "TimeRange",
+              "exportFieldName": "UserPrincipalName",
+              "exportParameterName": "UserPrincipalName",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{laws}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Unsuccessful",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 0,
+                      "palette": "redDark"
+                    }
+                  }
+                ]
+              }
+            },
+            "name": "Top users with unsuccessful logins"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AADNonInteractiveUserSignInLogs\n| where TimeGenerated {TimeRange}\n| where  UserPrincipalName == '{UserPrincipalName}'\n| summarize Successful=countif(ResultType == 0) , Unsuccessful=countif(ResultType != 0), Total= count() by UserPrincipalName, ClientAppUsed, AppDisplayName\n| order by Unsuccessful",
+              "size": 0,
+              "title": "Login Brakedown By App Used For: {UserPrincipalName}",
+              "timeContextFromParameter": "TimeRange",
+              "exportFieldName": "AppDisplayName",
+              "exportParameterName": "AppDisplayName",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{laws}"
+              ],
+              "sortBy": []
+            },
+            "conditionalVisibility": {
+              "parameterName": "UserPrincipalName",
+              "comparison": "isNotEqualTo"
+            },
+            "name": "Login brakedown by App Used for users"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AADNonInteractiveUserSignInLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName == '{UserPrincipalName}'\n| where ResultType != 0\n| where AppDisplayName == '{AppDisplayName}'\n| extend DeviceName = tostring(parse_json(DeviceDetail).displayName)\n| extend trustType = tostring(parse_json(DeviceDetail).trustType)\n| extend deviceId_ = tostring(parse_json(DeviceDetail).deviceId)\n| extend operatingSystem = tostring(parse_json(DeviceDetail).operatingSystem)\n| project TimeGenerated, UserDisplayName, AppDisplayName, DeviceName,operatingSystem, ResultType, ResultDescription, trustType, deviceId_",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "{AppDisplayName} Unsuccessful Logs brakedown",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{laws}"
+              ]
+            },
+            "conditionalVisibilities": [
+              {
+                "parameterName": "UserPrincipalName",
+                "comparison": "isNotEqualTo"
+              },
+              {
+                "parameterName": "AppDisplayName",
+                "comparison": "isNotEqualTo"
+              }
+            ],
+            "name": "App logs brakedown"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "SelectedTabName",
+        "comparison": "isEqualTo",
+        "value": "overview"
+      },
+      "name": "Overview Group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "| Error | Description |\r\n|---|---|\r\n| AADSTS16000 | SelectUserAccount - This is an interrupt thrown by Azure AD, which results in UI that allows the user to select from among multiple valid SSO sessions. This error is fairly common and may be returned to the application if `prompt=none` is specified. |\r\n| AADSTS16001 | UserAccountSelectionInvalid - You'll see this error if the user clicks on a tile that the session select logic has rejected. When triggered, this error allows the user to recover by picking from an updated list of tiles/sessions, or by choosing another account. This error can occur because of a code defect or race condition. |\r\n| AADSTS16002 | AppSessionSelectionInvalid - The app-specified SID requirement was not met.  |\r\n| AADSTS16003 | SsoUserAccountNotFoundInResourceTenant - Indicates that the user hasn't been explicitly added to the tenant. |\r\n| AADSTS17003 | CredentialKeyProvisioningFailed - Azure AD can't provision the user key. |\r\n| AADSTS20001 | WsFedSignInResponseError - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS20012 | WsFedMessageInvalid - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS20033 | FedMetadataInvalidTenantName - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS28002 | Provided value for the input parameter scope '{scope}' isn't valid when requesting an access token. Please specify a valid scope. |\r\n| AADSTS28003 | Provided value for the input parameter scope can't be empty when requesting an access token using the provided authorization code. Please specify a valid scope.|\r\n| AADSTS40008 | OAuth2IdPUnretryableServerError - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS40009 | OAuth2IdPRefreshTokenRedemptionUserError - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS40010 | OAuth2IdPRetryableServerError - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS40015 | OAuth2IdPAuthCodeRedemptionUserError - There's an issue with your federated Identity Provider. Contact your IDP to resolve this issue. |\r\n| AADSTS50000 | TokenIssuanceError - There's an issue with the sign-in service. [Open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) to resolve this issue. |\r\n| AADSTS50001 | InvalidResource - The resource is disabled or doesn't exist. Check your app's code to ensure that you have specified the exact resource URL for the resource you're trying to access.  |\r\n| AADSTS50002 | NotAllowedTenant - Sign-in failed because of a restricted proxy access on the tenant. If it's your own tenant policy, you can change your restricted tenant settings to fix this issue. |\r\n| AADSTS500021 | Access to '{tenant}' tenant is denied. AADSTS500021 indicates that the tenant restriction feature is configured and that the user is trying to access a tenant that isn't in the list of allowed tenants specified in the header `Restrict-Access-To-Tenant`. For more information, see [Use tenant restrictions to manage access to SaaS cloud applications](../manage-apps/tenant-restrictions.md).|\r\n| AADSTS500022 | Access to '{tenant}' tenant is denied. AADSTS500022 indicates that the tenant restriction feature is configured and that the user is trying to access a tenant that isn't in the list of allowed tenants specified in the header `Restrict-Access-To-Tenant`. For more information, see [Use tenant restrictions to manage access to SaaS cloud applications](../manage-apps/tenant-restrictions.md).|\r\n| AADSTS50003 | MissingSigningKey - Sign-in failed because of a missing signing key or certificate. This might be because there was no signing key configured in the app. To learn more, see the troubleshooting article for error [AADSTS50003](/troubleshoot/azure/active-directory/error-code-aadsts50003-cert-or-key-not-configured). If you still see issues, contact the app owner or an app admin. |\r\n| AADSTS50005 | DevicePolicyError - User tried to log in to a device from a platform that's currently not supported through Conditional Access policy. |\r\n| AADSTS50006 | InvalidSignature - Signature verification failed because of an invalid signature. |\r\n| AADSTS50007 | PartnerEncryptionCertificateMissing - The partner encryption certificate was not found for this app. [Open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) with Microsoft to get this fixed. |\r\n| AADSTS50008 | InvalidSamlToken - SAML assertion is missing or misconfigured in the token. Contact your federation provider. |\r\n| AADSTS50010 | AudienceUriValidationFailed - Audience URI validation for the app failed since no token audiences were configured. |\r\n| AADSTS50011 | InvalidReplyTo - The reply address is missing, misconfigured, or doesn't match reply addresses configured for the app.  As a resolution ensure to add this missing reply address to the Azure Active Directory application or have someone with the permissions to manage your application in Active Directory do this for you. To learn more, see the troubleshooting article for error [AADSTS50011](/troubleshoot/azure/active-directory/error-code-aadsts50011-reply-url-mismatch).|\r\n| AADSTS50012 | AuthenticationFailed - Authentication failed for one of the following reasons:<ul><li>The subject name of the signing certificate isn't authorized</li><li>A matching trusted authority policy was not found for the authorized subject name</li><li>The certificate chain isn't valid</li><li>The signing certificate isn't valid</li><li>Policy isn't configured on the tenant</li><li>Thumbprint of the signing certificate isn't authorized</li><li>Client assertion contains an invalid signature</li></ul> |\r\n| AADSTS50013 | InvalidAssertion - Assertion is invalid because of various reasons - The token issuer doesn't match the api version within its valid time range -expired -malformed - Refresh token in the assertion isn't a primary refresh token. |\r\n| AADSTS50014 | GuestUserInPendingState - The user's redemption is in a pending state. The guest user account isn't fully created yet. |\r\n| AADSTS50015 | ViralUserLegalAgeConsentRequiredState - The user requires legal age group consent. |\r\n| AADSTS50017 | CertificateValidationFailed - Certification validation failed, reasons for the following reasons:<ul><li>Cannot find issuing certificate in trusted certificates list</li><li>Unable to find expected CrlSegment</li><li>Cannot find issuing certificate in trusted certificates list</li><li>Delta CRL distribution point is configured without a corresponding CRL distribution point</li><li>Unable to retrieve valid CRL segments because of a timeout issue</li><li>Unable to download CRL</li></ul>Contact the tenant admin. |\r\n| AADSTS50020 | UserUnauthorized - Users are unauthorized to call this endpoint. |\r\n| AADSTS500212 | NotAllowedByOutboundPolicyTenant - The user's administrator has set an outbound access policy that doesn't allow access to the resource tenant. |\r\n| AADSTS500213 | NotAllowedByInboundPolicyTenant - The resource tenant's cross-tenant access policy doesn't allow this user to access this tenant. |\r\n| AADSTS50027 | InvalidJwtToken - Invalid JWT token because of the following reasons:<ul><li>doesn't contain nonce claim, sub claim</li><li>subject identifier mismatch</li><li>duplicate claim in idToken claims</li><li>unexpected issuer</li><li>unexpected audience</li><li>not within its valid time range </li><li>token format isn't proper</li><li>External ID token from issuer failed signature verification.</li></ul> |\r\n| AADSTS50029 | Invalid URI - domain name contains invalid characters. Contact the tenant admin. |\r\n| AADSTS50032 | WeakRsaKey - Indicates the erroneous user attempt to use a weak RSA key. |\r\n| AADSTS50033 | RetryableError - Indicates a transient error not related to the database operations. |\r\n| AADSTS50034 | UserAccountNotFound - To sign into this application, the account must be added to the directory. |\r\n| AADSTS50042 | UnableToGeneratePairwiseIdentifierWithMissingSalt - The salt required to generate a pairwise identifier is missing in principle. Contact the tenant admin. |\r\n| AADSTS50043 | UnableToGeneratePairwiseIdentifierWithMultipleSalts |\r\n| AADSTS50048 | SubjectMismatchesIssuer - Subject mismatches Issuer claim in the client assertion. Contact the tenant admin. |\r\n| AADSTS50049 | NoSuchInstanceForDiscovery - Unknown or invalid instance. |\r\n| AADSTS50050 | MalformedDiscoveryRequest - The request is malformed. |\r\n| AADSTS50053 | This error can result from two different reasons: <br><ul><li>IdsLocked - The account is locked because the user tried to sign in too many times with an incorrect user ID or password. The user is blocked due to repeated sign-in attempts. See [Remediate risks and unblock users](../identity-protection/howto-identity-protection-remediate-unblock.md).</li><li>Or, sign-in was blocked because it came from an IP address with malicious activity.</li></ul> <br>To determine which failure reason caused this error, sign in to the [Azure portal](https://portal.azure.com).  Navigate to your Azure AD tenant and then **Monitoring** -> **Sign-ins**.  Find the failed user sign-in with **Sign-in error code** 50053 and check the **Failure reason**.|\r\n| AADSTS50055 | InvalidPasswordExpiredPassword - The password is expired. The user's password is expired, and therefore their login or session was ended. They will be offered the opportunity to reset it, or may ask an admin to reset it via [Reset a user's password using Azure Active Directory](../fundamentals/active-directory-users-reset-password-azure-portal.md). |\r\n| AADSTS50056 | Invalid or null password: password doesn't exist in the directory for this user. The user should be asked to enter their password again. |\r\n| AADSTS50057 | UserDisabled - The user account is disabled. The user object in Active Directory backing this account has been disabled. An admin can re-enable this account [through PowerShell](/powershell/module/activedirectory/enable-adaccount) |\r\n| AADSTS50058 | UserInformationNotProvided - Session information isn't sufficient for single-sign-on. This means that a user isn't signed in. This is a common error that's expected when a user is unauthenticated and has not yet signed in.</br>If this error is encountered in an SSO context where the user has previously signed in, this means that the SSO session was either not found or invalid.</br>This error may be returned to the application if prompt=none is specified. |\r\n| AADSTS50059 | MissingTenantRealmAndNoUserInformationProvided - Tenant-identifying information was not found in either the request or implied by any provided credentials. The user can contact the tenant admin to help resolve the issue. |\r\n| AADSTS50061 | SignoutInvalidRequest - Unable to complete signout. The request was invalid. |\r\n| AADSTS50064 | CredentialAuthenticationError - Credential validation on username or password has failed. |\r\n| AADSTS50068 | SignoutInitiatorNotParticipant - Sign out has failed. The app that initiated sign out isn't a participant in the current session. |\r\n| AADSTS50070 | SignoutUnknownSessionIdentifier - Sign out has failed. The sign out request specified a name identifier that didn't match the existing session(s). |\r\n| AADSTS50071 | SignoutMessageExpired - The logout request has expired. |\r\n| AADSTS50072 | UserStrongAuthEnrollmentRequiredInterrupt - User needs to enroll for second factor authentication (interactive). |\r\n| AADSTS50074 | UserStrongAuthClientAuthNRequiredInterrupt - Strong authentication is required and the user did not pass the MFA challenge. |\r\n| AADSTS50076 | UserStrongAuthClientAuthNRequired - Due to a configuration change made by the admin, or because you moved to a new location, the user must use multi-factor authentication to access the resource. Retry with a new authorize request for the resource. |\r\n| AADSTS50079 | UserStrongAuthEnrollmentRequired - Due to a configuration change made by the administrator, or because the user moved to a new location, the user is required to use multi-factor authentication. |\r\n| AADSTS50085 | Refresh token needs social IDP login. Have user try signing-in again with username -password |\r\n| AADSTS50086 | SasNonRetryableError |\r\n| AADSTS50087 | SasRetryableError - A transient error has occurred during strong authentication. Please try again. |\r\n| AADSTS50088 | Limit on telecom MFA calls reached. Please try again in a few minutes. |\r\n| AADSTS50089 | Authentication failed due to flow token expired. Expected - auth codes, refresh tokens, and sessions expire over time or are revoked by the user or an admin. The app will request a new login from the user. |\r\n| AADSTS50097 | DeviceAuthenticationRequired - Device authentication is required. |\r\n| AADSTS50099 | PKeyAuthInvalidJwtUnauthorized - The JWT signature is invalid. |\r\n| AADSTS50105 | EntitlementGrantsNotFound - The signed in user isn't assigned to a role for the signed in app. Assign the user  to the app. To learn more, see the troubleshooting article for error [AADSTS50105](/troubleshoot/azure/active-directory/error-code-aadsts50105-user-not-assigned-role). |\r\n| AADSTS50107 | InvalidRealmUri - The requested federation realm object doesn't exist. Contact the tenant admin. |\r\n| AADSTS50120 | ThresholdJwtInvalidJwtFormat - Issue with JWT header. Contact the tenant admin. |\r\n| AADSTS50124 | ClaimsTransformationInvalidInputParameter - Claims Transformation contains invalid input parameter. Contact the tenant admin to update the policy. |\r\n| AADSTS501241 | Mandatory Input '{paramName}' missing from transformation id '{transformId}'. This error is returned while Azure AD is trying to build a SAML response to the application. NameID claim or NameIdentifier is mandatory in SAML response and if Azure AD failed to get source attribute for NameID claim, it will return this error. As a resolution, ensure you add claim rules in Azure Portal > Azure Active Directory > Enterprise Applications > Select your application > Single Sign-On > User Attributes & Claims > Unique User Identifier (Name ID).  |\r\n| AADSTS50125 | PasswordResetRegistrationRequiredInterrupt - Sign-in was interrupted because of a password reset or password registration entry. |\r\n| AADSTS50126 | InvalidUserNameOrPassword - Error validating credentials due to invalid username or password. |\r\n| AADSTS50127 | BrokerAppNotInstalled - User needs to install a broker app to gain access to this content. |\r\n| AADSTS50128 | Invalid domain name - No tenant-identifying information found in either the request or implied by any provided credentials. |\r\n| AADSTS50129 | DeviceIsNotWorkplaceJoined - Workplace join is required to register the device. |\r\n| AADSTS50131 | ConditionalAccessFailed - Indicates various Conditional Access errors such as bad Windows device state, request blocked due to suspicious activity, access policy, or security policy decisions. |\r\n| AADSTS50132 | SsoArtifactInvalidOrExpired - The session isn't valid due to password expiration or recent password change. |\r\n| AADSTS50133 | SsoArtifactRevoked - The session isn't valid due to password expiration or recent password change. |\r\n| AADSTS50134 | DeviceFlowAuthorizeWrongDatacenter - Wrong data center. To authorize a request that was initiated by an app in the OAuth 2.0 device flow, the authorizing party must be in the same data center where the original request resides. |\r\n| AADSTS50135 | PasswordChangeCompromisedPassword - Password change is required due to account risk. |\r\n| AADSTS50136 | RedirectMsaSessionToApp - Single MSA session detected. |\r\n| AADSTS50139 | SessionMissingMsaOAuth2RefreshToken - The session is invalid due to a missing external refresh token. |\r\n| AADSTS50140 | KmsiInterrupt - This error occurred due to \"Keep me signed in\" interrupt when the user was signing-in. This is an expected part of the login flow, where a user is asked if they want to remain signed into their current browser to make further logins easier. For more information, see [The new Azure AD sign-in and “Keep me signed in” experiences rolling out now!](https://techcommunity.microsoft.com/t5/azure-active-directory-identity/the-new-azure-ad-sign-in-and-keep-me-signed-in-experiences/m-p/128267). You can [open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) with Correlation ID, Request ID, and Error code to get more details.|\r\n| AADSTS50143 | Session mismatch - Session is invalid because user tenant doesn't match the domain hint due to different resource. [Open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) with Correlation ID, Request ID, and Error code to get more details. |\r\n| AADSTS50144 | InvalidPasswordExpiredOnPremPassword - User's Active Directory password has expired. Generate a new password for the user or have the user use the self-service reset tool to reset their password. |\r\n| AADSTS50146 | MissingCustomSigningKey - This app is required to be configured with an app-specific signing key. It is either not configured with one, or the key has expired or isn't yet valid. |\r\n| AADSTS50147 | MissingCodeChallenge - The size of the code challenge parameter isn't valid. |\r\n| AADSTS501481 | The Code_Verifier doesn't match the code_challenge supplied in the authorization request.|\r\n| AADSTS50155 | DeviceAuthenticationFailed - Device authentication failed for this user. |\r\n| AADSTS50158 | ExternalSecurityChallenge - External security challenge was not satisfied. |\r\n| AADSTS50161 | InvalidExternalSecurityChallengeConfiguration - Claims sent by external provider isn't enough or Missing claim requested to external provider. |\r\n| AADSTS50166 | ExternalClaimsProviderThrottled - Failed to send the request to the claims provider. |\r\n| AADSTS50168 | ChromeBrowserSsoInterruptRequired - The client is capable of obtaining an SSO token through the Windows 10 Accounts extension, but the token was not found in the request or the supplied token was expired. |\r\n| AADSTS50169 | InvalidRequestBadRealm - The realm isn't a configured realm of the current service namespace. |\r\n| AADSTS50170 | MissingExternalClaimsProviderMapping - The external controls mapping is missing. |\r\n| AADSTS50173 | FreshTokenNeeded - The provided grant has expired due to it being revoked, and a fresh auth token is needed. Either an admin or a user revoked the tokens for this user, causing subsequent token refreshes to fail and require reauthentication. Have the user sign in again. |\r\n| AADSTS50177 | ExternalChallengeNotSupportedForPassthroughUsers - External challenge isn't supported for passthrough users. |\r\n| AADSTS50178 | SessionControlNotSupportedForPassthroughUsers - Session control isn't supported for passthrough users. |\r\n| AADSTS50180 | WindowsIntegratedAuthMissing - Integrated Windows authentication is needed. Enable the tenant for Seamless SSO. |\r\n| AADSTS50187 | DeviceInformationNotProvided - The service failed to perform device authentication. |\r\n| AADSTS50194 | Application '{appId}'({appName}) is n't configured as a multi-tenant application. Usage of the /common endpoint isn't supported for such applications created after '{time}'. Use a tenant-specific endpoint or configure the application to be multi-tenant. |\r\n| AADSTS50196 | LoopDetected - A client loop has been detected. Check the app’s logic to ensure that token caching is implemented, and that error conditions are handled correctly.  The app has made too many of the same request in too short a period, indicating that it is in a faulty state or is abusively requesting tokens. |\r\n| AADSTS50197 | ConflictingIdentities - The user could not be found. Try signing in again. |\r\n| AADSTS50199 | CmsiInterrupt - For security reasons, user confirmation is required for this request.  Because this is an \"interaction_required\" error, the client should do interactive auth.  This occurs because a system webview has been used to request a token for a native application - the user must be prompted to ask if this was actually the app they meant to sign into. To avoid this prompt, the redirect URI should be part of the following safe list: <br />http://<br />https://<br />msauth://(iOS only)<br />msauthv2://(iOS only)<br />chrome-extension:// (desktop Chrome browser only) |\r\n| AADSTS51000 | RequiredFeatureNotEnabled - The feature is disabled. |\r\n| AADSTS51001 | DomainHintMustbePresent - Domain hint must be present with on-premises security identifier or on-premises UPN. |\r\n| AADSTS1000104| XCB2BResourceCloudNotAllowedOnIdentityTenant - Resource cloud {resourceCloud} isn't allowed on identity tenant {identityTenant}. {resourceCloud} - cloud instance which owns the resource. {identityTenant} - is the tenant where signing-in identity is originated from. |\r\n| AADSTS51004 | UserAccountNotInDirectory - The user account doesn’t exist in the directory. |\r\n| AADSTS51005 | TemporaryRedirect - Equivalent to HTTP status 307, which indicates that the requested information is located at the URI specified in the location header. When you receive this status, follow the location header associated with the response. When the original request method was POST, the redirected request will also use the POST method. |\r\n| AADSTS51006 | ForceReauthDueToInsufficientAuth - Integrated Windows authentication is needed. User logged in using a session token that is missing the integrated Windows authentication claim. Request the  user to log in again. |\r\n| AADSTS52004 | DelegationDoesNotExistForLinkedIn - The user has not provided consent for access to LinkedIn resources. |\r\n| AADSTS53000 | DeviceNotCompliant - Conditional Access policy requires a compliant device, and the device isn't compliant. The user must enroll their device with an approved MDM provider like Intune. |\r\n| AADSTS53001 | DeviceNotDomainJoined - Conditional Access policy requires a domain joined device, and the device isn't domain joined. Have the user use a domain joined device. |\r\n| AADSTS53002 | ApplicationUsedIsNotAnApprovedApp - The app used isn't an approved app for Conditional Access. User needs to use one of the apps from the list of approved apps to use in order to get access. |\r\n| AADSTS53003 | BlockedByConditionalAccess - Access has been blocked by Conditional Access policies. The access policy does not allow token issuance. |\r\n| AADSTS53004 | ProofUpBlockedDueToRisk - User needs to complete the multi-factor authentication registration process before accessing this content. User should register for multi-factor authentication. |\r\n| AADSTS53010 | ProofUpBlockedDueToSecurityInfoAcr - Cannot configure multi-factor authentication methods because the organization requires this information to be set from specific locations or devices. |\r\n| AADSTS53011 | User blocked due to risk on home tenant. |\r\n| AADSTS54000 | MinorUserBlockedLegalAgeGroupRule |\r\n| AADSTS54005 | OAuth2 Authorization code was already redeemed, please retry with a new valid code or use an existing refresh token. |\r\n| AADSTS65001 | DelegationDoesNotExist - The user or administrator has not consented to use the application with ID X. Send an interactive authorization request for this user and resource. |\r\n| AADSTS65002 | Consent between first party application '{applicationId}' and first party resource '{resourceId}' must be configured via preauthorization - applications owned and operated by Microsoft must get approval from the API owner before requesting tokens for that API.  A developer in your tenant may be attempting to reuse an App ID owned by Microsoft. This error prevents them from impersonating a Microsoft application to call other APIs. They must move to another app ID they register in https://portal.azure.com.|\r\n| AADSTS65004 | UserDeclinedConsent - User declined to consent to access the app. Have the user retry the sign-in and consent to the app|\r\n| AADSTS65005 | MisconfiguredApplication - The app required resource access list does not contain apps discoverable by the resource or The client app has requested access to resource, which was not specified in its required resource access list or Graph service returned bad request or resource not found. If the app supports SAML, you may have configured the app with the wrong Identifier (Entity). To learn more, see the troubleshooting article for error [AADSTS650056](/troubleshoot/azure/active-directory/error-code-aadsts650056-misconfigured-app). |\r\n| AADSTS650052 | The app needs access to a service `(\\\"{name}\\\")` that your organization `\\\"{organization}\\\"` has not subscribed to or enabled. Contact your IT Admin to review the configuration of your service subscriptions. |\r\n| AADSTS650054 |  The application asked for permissions to access a resource that has been removed or is no longer available. Make sure that all resources the app is calling are present in the tenant you're operating in. |\r\n| AADSTS650056 | Misconfigured application. This could be due to one of the following: the client has not listed any permissions for '{name}' in the requested permissions in the client's application registration. Or, the admin has not consented in the tenant. Or, check the application identifier in the request to ensure it matches the configured client application identifier. Or, check the certificate in the request to ensure it's valid. Please contact your admin to fix the configuration or consent on behalf of the tenant. Client app ID: {id}. Please contact your admin to fix the configuration or consent on behalf of the tenant.|\r\n| AADSTS650057 | Invalid resource. The client has requested access to a resource which isn't listed in the requested permissions in the client's application registration. Client app ID: {appId}({appName}). Resource value from request: {resource}. Resource app ID: {resourceAppId}. List of valid resources from app registration: {regList}. |\r\n| AADSTS67003 | ActorNotValidServiceIdentity |\r\n| AADSTS70000 | InvalidGrant - Authentication failed. The refresh token isn't valid. Error may be due to the following reasons:<ul><li>Token binding header is empty</li><li>Token binding hash does not match</li></ul> |\r\n| AADSTS70001 | UnauthorizedClient - The application is disabled. To learn more, see the troubleshooting article for error [AADSTS70001](/troubleshoot/azure/active-directory/error-code-aadsts70001-app-not-found-in-directory). |\r\n| AADSTS70002 | InvalidClient - Error validating the credentials. The specified client_secret does not match the expected value for this client. Correct the client_secret and try again. For more info, see [Use the authorization code to request an access token](v2-oauth2-auth-code-flow.md#redeem-a-code-for-an-access-token). |\r\n| AADSTS70003 | UnsupportedGrantType - The app returned an unsupported grant type. |\r\n| AADSTS700030 | Invalid certificate - subject name in certificate isn't authorized. SubjectNames/SubjectAlternativeNames (up to 10) in token certificate are: {certificateSubjects}. |\r\n| AADSTS70004 | InvalidRedirectUri - The app returned an invalid redirect URI. The redirect address specified by the client does not match any configured addresses or any addresses on the OIDC approve list. |\r\n| AADSTS70005 | UnsupportedResponseType - The app returned an unsupported response type due to the following reasons:<ul><li>response type 'token' isn't enabled for the app</li><li>response type 'id_token' requires the 'OpenID' scope -contains an unsupported OAuth parameter value in the encoded wctx</li></ul> |\r\n| AADSTS700054 | Response_type 'id_token' isn't enabled for the application.  The application requested an ID token from the authorization endpoint, but did not have ID token implicit grant enabled.  Go to Azure Portal > Azure Active Directory > App registrations > Select your application > Authentication > Under 'Implicit grant and hybrid flows', make sure 'ID tokens' is selected.|\r\n| AADSTS70007 | UnsupportedResponseMode - The app returned an unsupported value of `response_mode` when requesting a token.  |\r\n| AADSTS70008 | ExpiredOrRevokedGrant - The refresh token has expired due to inactivity. The token was issued on XXX and was inactive for a certain amount of time. |\r\n| AADSTS700084 | The refresh token was issued to a single page app (SPA), and therefore has a fixed, limited lifetime of {time}, which can't be extended. It is now expired and a new sign in request must be sent by the SPA to the sign in page. The token was issued on {issueDate}.|\r\n| AADSTS70011 | InvalidScope - The scope requested by the app is invalid. |\r\n| AADSTS70012 | MsaServerError - A server error occurred while authenticating an MSA (consumer) user. Try again. If it continues to fail, [open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) |\r\n| AADSTS70016 | AuthorizationPending - OAuth 2.0 device flow error. Authorization is pending. The device will retry polling the request. |\r\n| AADSTS70018 | BadVerificationCode - Invalid verification code due to User typing in wrong user code for device code flow. Authorization isn't approved. |\r\n| AADSTS70019 | CodeExpired - Verification code expired. Have the user retry the sign-in. |\r\n| AADSTS70043 | The refresh token has expired or is invalid due to sign-in frequency checks by conditional access. The token was issued on {issueDate} and the maximum allowed lifetime for this request is {time}. |\r\n| AADSTS75001 | BindingSerializationError - An error occurred during SAML message binding. |\r\n| AADSTS75003 | UnsupportedBindingError - The app returned an error related to unsupported binding (SAML protocol response can't be sent via bindings other than HTTP POST). |\r\n| AADSTS75005 | Saml2MessageInvalid - Azure AD doesn’t support the SAML request sent by the app for SSO. To learn more, see the troubleshooting article for error [AADSTS75005](/troubleshoot/azure/active-directory/error-code-aadsts75005-not-a-valid-saml-request). |\r\n| AADSTS7500514 | A supported type of SAML response was not found. The supported response types are 'Response' (in XML namespace 'urn:oasis:names:tc:SAML:2.0:protocol') or 'Assertion' (in XML namespace 'urn:oasis:names:tc:SAML:2.0:assertion'). Application error - the developer will handle this error.|\r\n| AADSTS750054 | SAMLRequest or SAMLResponse must be present as query string parameters in HTTP request for SAML Redirect binding. To learn more, see the troubleshooting article for error [AADSTS750054](/troubleshoot/azure/active-directory/error-code-aadsts750054-saml-request-not-present). |\r\n| AADSTS75008 | RequestDeniedError - The request from the app was denied since the SAML request had an unexpected destination. |\r\n| AADSTS75011 | NoMatchedAuthnContextInOutputClaims - The authentication method by which the user authenticated with the service doesn't match requested authentication method. To learn more, see the troubleshooting article for error [AADSTS75011](/troubleshoot/azure/active-directory/error-code-aadsts75011-auth-method-mismatch). |\r\n| AADSTS75016 | Saml2AuthenticationRequestInvalidNameIDPolicy - SAML2 Authentication Request has invalid NameIdPolicy. |\r\n| AADSTS80001 | OnPremiseStoreIsNotAvailable - The Authentication Agent is unable to connect to Active Directory. Make sure that agent servers are members of the same AD forest as the users whose passwords need to be validated and they are able to connect to Active Directory. |\r\n| AADSTS80002 | OnPremisePasswordValidatorRequestTimedout - Password validation request timed out. Make sure that Active Directory is available and responding to requests from the agents. |\r\n| AADSTS80005 | OnPremisePasswordValidatorUnpredictableWebException - An unknown error occurred while processing the response from the Authentication Agent. Retry the request. If it continues to fail, [open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) to get more details on the error. |\r\n| AADSTS80007 | OnPremisePasswordValidatorErrorOccurredOnPrem - The Authentication Agent is unable to validate user's password. Check the agent logs for more info and verify that Active Directory is operating as expected. |\r\n| AADSTS80010 | OnPremisePasswordValidationEncryptionException - The Authentication Agent is unable to decrypt password. |\r\n| AADSTS80012 | OnPremisePasswordValidationAccountLogonInvalidHours - The users attempted to log on outside of the allowed hours (this is specified in AD). |\r\n| AADSTS80013 | OnPremisePasswordValidationTimeSkew - The authentication attempt could not be completed due to time skew between the machine running the authentication agent and AD. Fix time sync issues. |\r\n| AADSTS81004 | DesktopSsoIdentityInTicketIsNotAuthenticated - Kerberos authentication attempt failed. |\r\n| AADSTS81005 | DesktopSsoAuthenticationPackageNotSupported - The authentication package isn't supported. |\r\n| AADSTS81006 | DesktopSsoNoAuthorizationHeader - No authorization header was found. |\r\n| AADSTS81007 | DesktopSsoTenantIsNotOptIn - The tenant isn't enabled for Seamless SSO. |\r\n| AADSTS81009 | DesktopSsoAuthorizationHeaderValueWithBadFormat - Unable to validate user's Kerberos ticket. |\r\n| AADSTS81010 | DesktopSsoAuthTokenInvalid - Seamless SSO failed because the user's Kerberos ticket has expired or is invalid. |\r\n| AADSTS81011 | DesktopSsoLookupUserBySidFailed - Unable to find user object based on information in the user's Kerberos ticket. |\r\n| AADSTS81012 | DesktopSsoMismatchBetweenTokenUpnAndChosenUpn - The user trying to sign in to Azure AD is different from the user signed into the device. |\r\n| AADSTS90002 | InvalidTenantName - The tenant name wasn't found in the data store. Check to make sure you have the correct tenant ID. |\r\n| AADSTS90004 | InvalidRequestFormat - The request isn't properly formatted. |\r\n| AADSTS90005 | InvalidRequestWithMultipleRequirements - Unable to complete the request. The request isn't valid because the identifier and login hint can't be used together.  |\r\n| AADSTS90006 | ExternalServerRetryableError - The service is temporarily unavailable.|\r\n| AADSTS90007 | InvalidSessionId - Bad request. The passed session ID can't be parsed. |\r\n| AADSTS90008 | TokenForItselfRequiresGraphPermission - The user or administrator hasn't consented to use the application. At the minimum, the application requires access to Azure AD by specifying the sign-in and read user profile permission. |\r\n| AADSTS90009 | TokenForItselfMissingIdenticalAppIdentifier - The application is requesting a token for itself. This scenario is supported only if the resource that's specified is using the GUID-based application ID. |\r\n| AADSTS90010 | NotSupported - Unable to create the algorithm. |\r\n| AADSTS9001023 |The grant type isn't supported over the /common or /consumers endpoints. Please use the /organizations or tenant-specific endpoint.|\r\n| AADSTS90012 | RequestTimeout - The requested has timed out. |\r\n| AADSTS90013 | InvalidUserInput - The input from the user isn't valid. |\r\n| AADSTS90014 | MissingRequiredField - This error code may appear in various cases when an expected field isn't present in the credential. |\r\n| AADSTS900144 | The request body must contain the following parameter: '{name}'.  Developer error - the app is attempting to sign in without the necessary or correct authentication parameters.|\r\n| AADSTS90015 | QueryStringTooLong - The query string is too long. |\r\n| AADSTS90016 | MissingRequiredClaim - The access token isn't valid. The required claim is missing. |\r\n| AADSTS90019 | MissingTenantRealm - Azure AD was unable to determine the tenant identifier from the request. |\r\n| AADSTS90020 | The SAML 1.1 Assertion is missing ImmutableID of the user. Developer error - the app is attempting to sign in without the necessary or correct authentication parameters.|\r\n| AADSTS90022 | AuthenticatedInvalidPrincipalNameFormat - The principal name format isn't valid, or doesn't meet the expected `name[/host][@realm]` format. The principal name is required, host and realm are optional and may be set to null. |\r\n| AADSTS90023 | InvalidRequest - The authentication service request isn't valid. |\r\n| AADSTS9002313 | InvalidRequest - Request is malformed or invalid. - The issue here is because there was something wrong with the request to a certain endpoint. The suggestion to this issue is to get a fiddler trace of the error occurring and looking to see if the request is actually properly formatted or not. |\r\n| AADSTS9002332 | Application '{principalId}'({principalName}) is configured for use by Azure Active Directory users only. Please do not use the /consumers endpoint to serve this request. |\r\n| AADSTS90024 | RequestBudgetExceededError - A transient error has occurred. Try again. |\r\n| AADSTS90027 | We are unable to issue tokens from this API version on the MSA tenant. Please contact the application vendor as they need to use version 2.0 of the protocol to support this.|\r\n| AADSTS90033 | MsodsServiceUnavailable - The Microsoft Online Directory Service (MSODS) isn't available. |\r\n| AADSTS90036 | MsodsServiceUnretryableFailure - An unexpected, non-retryable error from the WCF service hosted by MSODS has occurred. [Open a support ticket](../fundamentals/active-directory-troubleshooting-support-howto.md) to get more details on the error. |\r\n| AADSTS90038 | NationalCloudTenantRedirection - The specified tenant 'Y' belongs to the National Cloud 'X'. Current cloud instance 'Z' does not federate with X. A cloud redirect error is returned. |\r\n| AADSTS90043 | NationalCloudAuthCodeRedirection - The feature is disabled. |\r\n| AADSTS900432 | Confidential Client isn't supported in Cross Cloud request.|\r\n| AADSTS90051 | InvalidNationalCloudId - The national cloud identifier contains an invalid cloud identifier. |\r\n| AADSTS90055 | TenantThrottlingError - There are too many incoming requests. This exception is thrown for blocked tenants. |\r\n| AADSTS90056 | BadResourceRequest - To redeem the code for an access token, the app should send a POST request to the `/token` endpoint. Also, prior to this, you should provide an authorization code and send it in the POST request to the `/token` endpoint. Refer to this article for an overview of OAuth 2.0 authorization code flow: [../azuread-dev/v1-protocols-oauth-code.md](../azuread-dev/v1-protocols-oauth-code.md). Direct the user to the `/authorize` endpoint, which will return an authorization_code. By posting a request to the `/token` endpoint, the user gets the access token. Log in the Azure portal, and check **App registrations > Endpoints** to confirm that the two endpoints were configured correctly. |\r\n| AADSTS90072 | PassThroughUserMfaError - The external account that the user signs in with doesn't exist on the tenant that they signed into; so the user can't satisfy the MFA requirements for the tenant. This error also might occur if the users are synced, but there is a mismatch in the ImmutableID (sourceAnchor) attribute between Active Directory and Azure AD. The account must be added as an external user in the tenant first. Sign out and sign in with a different Azure AD user account. |\r\n| AADSTS90081 | OrgIdWsFederationMessageInvalid - An error occurred when the service tried to process a WS-Federation message. The message isn't valid. |\r\n| AADSTS90082 | OrgIdWsFederationNotSupported - The selected authentication policy for the request isn't currently supported. |\r\n| AADSTS90084 | OrgIdWsFederationGuestNotAllowed - Guest accounts aren't allowed for this site. |\r\n| AADSTS90085 | OrgIdWsFederationSltRedemptionFailed - The service is unable to issue a token because the company object hasn't been provisioned yet. |\r\n| AADSTS90086 | OrgIdWsTrustDaTokenExpired - The user DA token is expired. |\r\n| AADSTS90087 | OrgIdWsFederationMessageCreationFromUriFailed - An error occurred while creating the WS-Federation message from the URI. |\r\n| AADSTS90090 | GraphRetryableError - The service is temporarily unavailable. |\r\n| AADSTS90091 | GraphServiceUnreachable |\r\n| AADSTS90092 | GraphNonRetryableError |\r\n| AADSTS90093 | GraphUserUnauthorized - Graph returned with a forbidden error code for the request. |\r\n| AADSTS90094 | AdminConsentRequired - Administrator consent is required. |\r\n| AADSTS900382 | Confidential Client isn't supported in Cross Cloud request. |\r\n| AADSTS90095  | AdminConsentRequiredRequestAccess-  In the Admin Consent Workflow experience, an interrupt that appears when the user is told they need to ask the admin for consent.  |\r\n| AADSTS90099 | The application '{appId}' ({appName}) has not been authorized in the tenant '{tenant}'. Applications must be authorized to access the customer tenant before partner delegated administrators can use them. Provide pre-consent or execute the appropriate Partner Center API to authorize the application. |\r\n| AADSTS900971| No reply address provided.|\r\n| AADSTS90100 | InvalidRequestParameter - The parameter is empty or not valid. |\r\n| AADSTS901002 | AADSTS901002: The 'resource' request parameter isn't supported. |\r\n| AADSTS90101 | InvalidEmailAddress - The supplied data isn't a valid email address. The email address must be in the format `someone@example.com`. |\r\n| AADSTS90102 | InvalidUriParameter - The value must be a valid absolute URI. |\r\n| AADSTS90107 | InvalidXml - The request isn't valid. Make sure your data doesn't have invalid characters.|\r\n| AADSTS90114 | InvalidExpiryDate - The bulk token expiration timestamp will cause an expired token to be issued. |\r\n| AADSTS90117 | InvalidRequestInput |\r\n| AADSTS90119 | InvalidUserCode - The user code is null or empty.|\r\n| AADSTS90120 | InvalidDeviceFlowRequest - The request was already authorized or declined. |\r\n| AADSTS90121 | InvalidEmptyRequest - Invalid empty request.|\r\n| AADSTS90123 | IdentityProviderAccessDenied - The token can't be issued because the identity or claim issuance provider denied the request. |\r\n| AADSTS90124 | V1ResourceV2GlobalEndpointNotSupported - The resource isn't supported over the `/common` or `/consumers` endpoints. Use the `/organizations` or tenant-specific endpoint instead. |\r\n| AADSTS90125 | DebugModeEnrollTenantNotFound - The user isn't in the system. Make sure you entered the user name correctly. |\r\n| AADSTS90126 | DebugModeEnrollTenantNotInferred - The user type isn't supported on this endpoint. The system can't infer the user's tenant from the user name. |\r\n| AADSTS90130 | NonConvergedAppV2GlobalEndpointNotSupported - The application isn't supported over the `/common` or `/consumers` endpoints. Use the `/organizations` or tenant-specific endpoint instead. |\r\n| AADSTS120000 | PasswordChangeIncorrectCurrentPassword |\r\n| AADSTS120002 | PasswordChangeInvalidNewPasswordWeak |\r\n| AADSTS120003 | PasswordChangeInvalidNewPasswordContainsMemberName |\r\n| AADSTS120004 | PasswordChangeOnPremComplexity |\r\n| AADSTS120005 | PasswordChangeOnPremSuccessCloudFail |\r\n| AADSTS120008 | PasswordChangeAsyncJobStateTerminated - A non-retryable error has occurred.|\r\n| AADSTS120011 | PasswordChangeAsyncUpnInferenceFailed |\r\n| AADSTS120012 | PasswordChangeNeedsToHappenOnPrem |\r\n| AADSTS120013 | PasswordChangeOnPremisesConnectivityFailure |\r\n| AADSTS120014 | PasswordChangeOnPremUserAccountLockedOutOrDisabled |\r\n| AADSTS120015 | PasswordChangeADAdminActionRequired |\r\n| AADSTS120016 | PasswordChangeUserNotFoundBySspr |\r\n| AADSTS120018 | PasswordChangePasswordDoesnotComplyFuzzyPolicy |\r\n| AADSTS120020 | PasswordChangeFailure |\r\n| AADSTS120021 | PartnerServiceSsprInternalServiceError |\r\n| AADSTS130004 | NgcKeyNotFound - The user principal doesn't have the NGC ID key configured. |\r\n| AADSTS130005 | NgcInvalidSignature - NGC key signature verified failed.|\r\n| AADSTS130006 | NgcTransportKeyNotFound - The NGC transport key isn't configured on the device. |\r\n| AADSTS130007 | NgcDeviceIsDisabled - The device is disabled. |\r\n| AADSTS130008 | NgcDeviceIsNotFound - The device referenced by the NGC key wasn't found. |\r\n| AADSTS135010 | KeyNotFound |\r\n| AADSTS135011 |  Device used during the authentication is disabled.|\r\n| AADSTS140000 | InvalidRequestNonce - Request nonce isn't provided. |\r\n| AADSTS140001 | InvalidSessionKey - The session key isn't valid.|\r\n| AADSTS165004 | Actual message content is runtime specific. Please see returned exception message for details. |\r\n| AADSTS165900 | InvalidApiRequest - Invalid request. |\r\n| AADSTS220450 | UnsupportedAndroidWebViewVersion - The Chrome WebView version isn't supported. |\r\n| AADSTS220501 | InvalidCrlDownload |\r\n| AADSTS221000 | DeviceOnlyTokensNotSupportedByResource - The resource isn't configured to accept device-only tokens. |\r\n| AADSTS240001 | BulkAADJTokenUnauthorized - The user isn't authorized to register devices in Azure AD. |\r\n| AADSTS240002 | RequiredClaimIsMissing - The id_token can't be used as `urn:ietf:params:oauth:grant-type:jwt-bearer` grant.|\r\n| AADSTS530032 | BlockedByConditionalAccessOnSecurityPolicy - The tenant admin has configured a security policy that blocks this request. Check the security policies that are defined on the tenant level to determine if your request meets the policy requirements. |\r\n| AADSTS700016 | UnauthorizedClient_DoesNotMatchRequest - The application wasn't found in the directory/tenant. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have misconfigured the identifier value for the application or sent your authentication request to the wrong tenant. |\r\n| AADSTS700020 | InteractionRequired - The access grant requires interaction. |\r\n| AADSTS700022 | InvalidMultipleResourcesScope - The provided value for the input parameter scope isn't valid because it contains more than one resource. |\r\n| AADSTS700023 | InvalidResourcelessScope - The provided value for the input parameter scope isn't valid when request an access token. |\r\n| AADSTS7000215 | Invalid client secret is provided. Developer error - the app is attempting to sign in without the necessary or correct authentication parameters.|\r\n| AADSTS7000222 | InvalidClientSecretExpiredKeysProvided - The provided client secret keys are expired. Visit the Azure portal to create new keys for your app, or consider using certificate credentials for added security: [https://aka.ms/certCreds](./active-directory-certificate-credentials.md) |\r\n| AADSTS700005 | InvalidGrantRedeemAgainstWrongTenant - Provided Authorization Code is intended to use against other tenant, thus rejected. OAuth2 Authorization Code must be redeemed against same tenant it was acquired for (/common or /{tenant-ID} as appropriate) |\r\n| AADSTS1000000 | UserNotBoundError - The Bind API requires the Azure AD user to also authenticate with an external IDP, which hasn't happened yet. |\r\n| AADSTS1000002 | BindCompleteInterruptError - The bind completed successfully, but the user must be informed. |\r\n| AADSTS100007 | AAD Regional ONLY supports auth either for MSIs OR for requests from MSAL using SN+I for 1P apps or 3P apps in Microsoft infrastructure tenants.|\r\n| AADSTS1000031 | Application {appDisplayName} can't be accessed at this time. Contact your administrator. |\r\n| AADSTS7000112 | UnauthorizedClientApplicationDisabled - The application is disabled. |\r\n| AADSTS7000114| Application 'appIdentifier' isn't allowed to make application on-behalf-of calls.|\r\n| AADSTS7500529 | The value ‘SAMLId-Guid’ isn't a valid SAML ID - Azure AD uses this attribute to populate the InResponseTo attribute of the returned response. ID must not begin with a number, so a common strategy is to prepend a string like \"id\" to the string representation of a GUID. For example, id6c1c178c166d486687be4aaf5e482730 is a valid ID. |"
+            },
+            "name": "text - 4"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "SelectedTabName",
+        "comparison": "isEqualTo",
+        "value": "error"
+      },
+      "name": "ErrorCodes"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "fromTemplateId": "sentinel-UserWorkbook",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
