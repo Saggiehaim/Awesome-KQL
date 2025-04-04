@@ -773,11 +773,11 @@
         },
         "conditionalVisibilities": [
           {
-            "parameterName": "TotalE5Seats",
+            "parameterName": "TotalMdcPlan2",
             "comparison": "isNotEqualTo"
           },
           {
-            "parameterName": "TotalE5Seats",
+            "parameterName": "TotalMdcPlan2",
             "comparison": "isNotEqualTo",
             "value": "0"
           }
