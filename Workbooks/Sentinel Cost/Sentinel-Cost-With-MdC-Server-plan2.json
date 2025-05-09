@@ -20,7 +20,7 @@
             "type": 4,
             "isRequired": true,
             "value": {
-              "durationMs": 7776000000
+              "durationMs": 5184000000
             },
             "typeSettings": {
               "selectableValues": [
@@ -728,7 +728,7 @@
           {
             "type": 1,
             "content": {
-              "json": "## Microsoft Sentinel benefit for Defender for Cloud Servers Plan 2\r\n\r\nWith security information and event management (SIEM) and extended detection and response (XDR) from Microsoft, you’re armed with the context and automation you need to stop sophisticated, cross-domain attacks across your entire organization. \r\n\r\nMicrosoft Defender for Cloud Plan 2 customers can get data grant up to 500MB per server/day of Microsoft Defender For Cloud data ingestion into Microsoft Sentinel.\r\nThe data sources included in this offer include::\r\n\r\n- SecurityAlert\r\n- SecurityBaseline\r\n- SecurityBaselineSummary\r\n- SecurityDetection\r\n- SecurityEvent\r\n- WindowsFirewall\r\n- ProtectionStatus\r\n- Update and UpdateSummary when the Update Management solution isn't running in the workspace or solution targeting is enabled.\r\n- MDCFileIntegrityMonitoringEvents\r\n\r\nThe data grant will be calculated at the end of the month and applied to your bill, covering the cost of up to 500 MB of data ingestion per server/day.\r\n\r\nVisit https://learn.microsoft.com/en-us/azure/defender-for-cloud/data-ingestion-benefit for more information\r\n\r\n<br>\r\n\r\n### Below are the ingestion for the eligible data sources:\r\n\r\n_**Note:** Kindly specify **Total Servers for Servers seat** and **Ingestion Price** parameters for calculation._"
+              "json": "## Microsoft Sentinel benefit for Defender for Cloud Servers Plan 2\r\n\r\nWith security information and event management (SIEM) and extended detection and response (XDR) from Microsoft, you’re armed with the context and automation you need to stop sophisticated, cross-domain attacks across your entire organization. \r\n\r\nMicrosoft Defender for Cloud Plan 2 customers can get data grant up to 500MB per server/day of Microsoft Defender For Cloud data ingestion into Microsoft Sentinel.\r\nThe data sources included in this offer include::\r\n\r\n- SecurityAlert\r\n- SecurityBaseline\r\n- SecurityBaselineSummary\r\n- SecurityDetection\r\n- SecurityEvent\r\n- WindowsFirewall\r\n- ProtectionStatus\r\n- Update and UpdateSummary when the Update Management solution isn't running in the workspace or solution targeting is enabled.\r\n- MDCFileIntegrityMonitoringEvents\r\n- WindowsEvent\r\n- LinuxAuditLog\r\n\r\nThe data grant will be calculated at the end of the month and applied to your bill, covering the cost of up to 500 MB of data ingestion per server/day.\r\n\r\nVisit https://learn.microsoft.com/en-us/azure/defender-for-cloud/data-ingestion-benefit for more information\r\n\r\n<br>\r\n\r\n### Below are the ingestion for the eligible data sources:\r\n\r\n_**Note:** Kindly specify **Total Servers for Servers seat** and **Ingestion Price** parameters for calculation._"
             },
             "name": "MdcPlan2 Intro"
           },
@@ -736,7 +736,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "Usage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\"\r\n)   \r\n| summarize BillableDataGB = sum(Quantity) / 1000. by DataType\r\n| order by BillableDataGB desc\r\n",
+              "query": "Usage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")\r\n| summarize BillableDataGB = sum(Quantity) / 1000. by DataType\r\n| order by BillableDataGB desc\r\n",
               "size": 0,
               "timeContextFromParameter": "TimeRange",
               "queryType": 0,
@@ -762,7 +762,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "Usage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\")   \r\n| summarize DailyIngestionGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yyyy-MM-dd') \r\n| extend MaxDataGrantGB  = ((500*toreal({TotalMdcPlan2}))/1024)\r\n| sort by TimeGenerated asc\r\n",
+              "query": "Usage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")   \r\n| summarize DailyIngestionGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yyyy-MM-dd') \r\n| extend MaxDataGrantGB  = ((500*toreal({TotalMdcPlan2}))/1024)\r\n| sort by TimeGenerated asc\r\n",
               "size": 0,
               "aggregation": 3,
               "title": "Daily ingestion size (for eligible data sources) vs Maximum data grant:",
@@ -805,7 +805,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "Usage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\"\r\n)   \r\n| summarize TotalBillableDataGB = sum(Quantity) / 1024\r\n\r\n",
+              "query": "Usage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")  \r\n| summarize TotalBillableDataGB = sum(Quantity) / 1024\r\n\r\n",
               "size": 4,
               "title": "Total ingestion",
               "timeContextFromParameter": "TimeRange",
@@ -840,7 +840,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\")   \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| extend DailyMaxGrantGB = DailyMaxDiscountGB\r\n| summarize MaxDataGrantGB = sum(toreal(DailyMaxGrantGB))\r\n\r\n",
+              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")   \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| extend DailyMaxGrantGB = DailyMaxDiscountGB\r\n| summarize MaxDataGrantGB = sum(toreal(DailyMaxGrantGB))\r\n\r\n",
               "size": 4,
               "title": "Total Data Grant Limit",
               "timeContextFromParameter": "TimeRange",
@@ -887,7 +887,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\")   \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| summarize TotalEligibleGB = sum(iif(toreal(DailyBillableGB)>toreal(DailyMaxDiscountGB),toreal(DailyMaxDiscountGB),DailyBillableGB))\r\n\r\n",
+              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")  \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| summarize TotalEligibleGB = sum(iif(toreal(DailyBillableGB)>toreal(DailyMaxDiscountGB),toreal(DailyMaxDiscountGB),DailyBillableGB))\r\n\r\n",
               "size": 4,
               "title": "Total Data Grant Used",
               "timeContextFromParameter": "TimeRange",
@@ -934,7 +934,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\")   \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| summarize TotalEligibleGB = sum(iif(toreal(DailyBillableGB)>toreal(DailyMaxDiscountGB),toreal(DailyMaxDiscountGB),DailyBillableGB))\r\n| extend TotalDiscount = toreal(TotalEligibleGB)*{Price}\r\n| project TotalDiscount\r\n\r\n",
+              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")  \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| summarize TotalEligibleGB = sum(iif(toreal(DailyBillableGB)>toreal(DailyMaxDiscountGB),toreal(DailyMaxDiscountGB),DailyBillableGB))\r\n| extend TotalDiscount = toreal(TotalEligibleGB)*{Price}\r\n| project TotalDiscount\r\n\r\n",
               "size": 4,
               "title": "Estimated Saving",
               "timeContextFromParameter": "TimeRange",
@@ -981,7 +981,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let LicenseCost  = (15*toreal({TotalMdcPlan2}));\r\nprint LicenseCost\r\n",
+              "query": "let LicenseCost  = (15*toreal({TotalMdcPlan2}));\r\nlet seconds = ({TimeRange:seconds});\r\nlet days = seconds / 86400;\r\nlet months = iff(days <= 30 , 1 , toint(round(days / 30.44)));\r\nprint LicenseCost * months\r\n",
               "size": 4,
               "title": "Defedner For Servers Plan 2 Licensing Cost",
               "timeContextFromParameter": "TimeRange",
@@ -1029,7 +1029,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nlet LicenseCost  = (15*toreal({TotalMdcPlan2}));\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\")   \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| summarize TotalEligibleGB = sum(iif(toreal(DailyBillableGB)>toreal(DailyMaxDiscountGB),toreal(DailyMaxDiscountGB),DailyBillableGB))\r\n| extend TotalDiscount = toreal(TotalEligibleGB)*{Price}\r\n| project TotalDiscount - LicenseCost\r\n\r\n",
+              "query": "let DailyMaxDiscountGB  = ((500*toreal({TotalMdcPlan2}))/1024);\r\nlet LicenseCost  = (15*toreal({TotalMdcPlan2}));\r\nlet Seconds = ({TimeRange:seconds});\r\nlet Days = Seconds / 86400;\r\nlet Months = iff(Days <= 30 , 1 , toint(round(Days / 30.44)));\r\nlet TotalLicenseCost = LicenseCost * Months;\r\nUsage\r\n| where IsBillable == true\r\n| where DataType in (\"SecurityAlert\", \r\n\"SecurityBaseline\",\r\n\"SecurityBaselineSummary\",\r\n\"SecurityDetection\",\r\n\"SecurityEvent\",\r\n\"WindowsFirewall\",\r\n\"ProtectionStatus\",\r\n\"MDCFileIntegrityMonitoringEvents\",\r\n\"WindowsEvent\",\r\n\"LinuxAuditLog\")   \r\n| summarize DailyBillableGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yy-MM-dd') \r\n| summarize TotalEligibleGB = sum(iif(toreal(DailyBillableGB)>toreal(DailyMaxDiscountGB),toreal(DailyMaxDiscountGB),DailyBillableGB))\r\n| extend TotalDiscount = toreal(TotalEligibleGB)*{Price}\r\n| project TotalDiscount - TotalLicenseCost\r\n\r\n",
               "size": 4,
               "title": "Estimated Savings After Licensing Cost",
               "timeContextFromParameter": "TimeRange",
@@ -1243,7 +1243,7 @@
         ],
         "timeContextFromParameter": "TimeRange",
         "timeContext": {
-          "durationMs": 7776000000
+          "durationMs": 5184000000
         },
         "metrics": [
           {
