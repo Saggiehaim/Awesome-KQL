@@ -48,7 +48,11 @@ Usage
 | summarize DailyIngestionGB = toreal(sum(Quantity))/ 1024  by format_datetime(TimeGenerated, 'yyyy-MM-dd')
 | extend MaxDataGrantGB  = ((500*toreal(NumberOfLicenses))/1024)
 | sort by TimeGenerated asc
+| render timechart 
 ```
+
+**example**
+![Defender for Servers Plan 2 Overage Graph](./resources/imgs/maxgrantgraph.png)
 
 ## Analyze Data Ingestion by Type
 
@@ -64,6 +68,7 @@ Features:
 **Purpose**: Visualize data ingestion patterns to identify high-volume data sources and optimize costs.
 
 **How to use this query**:
+
 1. The query uses a two-step approach:
    - First, identifies top data sources
    - Then, creates a visual representation
@@ -147,7 +152,11 @@ Usage
 | summarize DailyIngestionGB = toreal(sum(Quantity)) / 1024 by bin(TimeGenerated, 1d)
 | join benefits on TimeGenerated
 | project TimeGenerated, DailyIngestionGB, BenefitUsedGB
+| render timechart 
 ```
+
+**example**
+![Defender for Servers Plan 2 Overage Graph](./resources/imgs/overagegraph.png)
 
 ## Compare daily ingestion with daily benefit grant for Defender for Servers Plan 2 - Show if yes or no
 
@@ -192,3 +201,6 @@ Usage
 | project TimeGenerated, DailyIngestionGB, BenefitUsedGB
 | extend BenefitOverage = iif(DailyIngestionGB  > BenefitUsedGB, "yes", "no")
 ```
+
+**example**
+![Defender for Servers Plan 2 Overage Graph](./resources/imgs/overagequery.png)
